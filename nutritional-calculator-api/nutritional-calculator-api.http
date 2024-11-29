@@ -1,6 +1,0 @@
-@nutritional_calculator_api_HostAddress = http://localhost:5043
-
-GET {{nutritional_calculator_api_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

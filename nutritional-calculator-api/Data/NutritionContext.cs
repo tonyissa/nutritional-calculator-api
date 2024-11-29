@@ -10,4 +10,15 @@ public class NutritionContext(DbContextOptions options) : DbContext(options)
     public DbSet<FoodNutrient> FoodNutrients { get; set; }
     public DbSet<Food> Foods { get; set; }
     public DbSet<Measure> Measures { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Category>()
+            .Navigation(c => c.Foods)
+            .AutoInclude(false);
+
+        modelBuilder.Entity<Food>()
+            .Navigation(f => f.Nutrients)
+            .AutoInclude(false);
+    }
 }

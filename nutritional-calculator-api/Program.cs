@@ -3,6 +3,7 @@ using Microsoft.OpenApi.Models;
 using nutritional_calculator_api.Data;
 using nutritional_calculator_api.Helpers;
 using nutritional_calculator_api.Options;
+using nutritional_calculator_api.Services;
 using System.Reflection;
 using System.Text.Json.Serialization;
 
@@ -13,8 +14,12 @@ var connectionString = builder.Configuration.GetConnectionString("SqliteConnecti
 
 builder.Services.AddControllers().AddJsonOptions(x =>
    x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
-
+builder.Services.AddMemoryCache();
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddSingleton<PopularityTracker>();
+builder.Services.AddHostedService<PopularityUpdateService>();
+
 builder.Services.AddSwaggerGen(s =>
 {
     s.SwaggerDoc("v1", new OpenApiInfo
@@ -28,7 +33,6 @@ builder.Services.AddSwaggerGen(s =>
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     s.IncludeXmlComments(xmlPath);
 });
-
 
 builder.Services.AddDbContext<NutritionContext>(opt =>
 {

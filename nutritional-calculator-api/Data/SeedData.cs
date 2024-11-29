@@ -1,4 +1,5 @@
 ﻿using CsvHelper;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using nutritional_calculator_api.Models;
 using nutritional_calculator_api.Options;
 using System.Globalization;
@@ -23,16 +24,16 @@ public static class SeedData
         int batchSize = 2000;
 
         await BatchInsertAsync<Category>(context, categories, batchSize);
+        await BatchInsertAsync<Food>(context, foods, batchSize);
         await BatchInsertAsync<Nutrient>(context, nutrients, batchSize, (batch, i) =>
         {
             return batch.Where(n => commonNutrients.Any(cn => n.Code == cn.Id)).Skip(i).Take(batchSize);
         });
-        await BatchInsertAsync<Food>(context, foods, batchSize);
+        await BatchInsertAsync<Measure>(context, measures, batchSize);
         await BatchInsertAsync<FoodNutrient>(context, foodNutrients, batchSize, (batch, i) =>
         {
             return batch.Where(fn => context.Nutrients.Any(n => fn.NutrientId == n.Id)).Skip(i).Take(batchSize);
         });
-        await BatchInsertAsync<Measure>(context, measures, batchSize);
     }
 
     private static List<TEntity> ReadCSVAndReturnList<TEntity>(string path)
