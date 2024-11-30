@@ -28,27 +28,38 @@ public class FoodsController : ControllerBase
     /// </summary>
     /// <returns> A list of food </returns>
     /// <param name="input">User query to search against database</param>
-    /// <param name="skip">For pagination, how many entries to skip before taking</param>
+    /// <param name="category">How many entries to skip before taking for pagination</param>
+    /// <param name="skip">How many entries to skip before taking for pagination</param>
     [HttpGet]
     [ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Get))]
-    public async Task<ActionResult<IEnumerable<Food>>> GetFoods(string input, int skipCount = 0)
+    public async Task<ActionResult<IEnumerable<Food>>> GetFoods(string input, string? category, int skip = 0)
     {
-        input = input.ToLower().Replace(",", "");
-        var cacheKey = $"Search_{input}";
+        input = input.ToLower();
+        var cacheKey = $"search:{input}:category:{category}";
 
         if (!_cache.TryGetValue(input, out List<Food> foodsList))
         {
-            foodsList = await _context.Foods
-                .Where(f => f.Description.ToLower().Replace(",", "").Contains(input))
+            var query = _context.Foods
+                .AsNoTracking()
                 .Include(f => f.Category)
-                .OrderBy(f => f.Category.Importance)
-                .ThenByDescending(f => f.Popularity)
-                .Skip(skipCount)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(category))
+            {
+                query = query.Where(f => f.Category.Name == category);
+            }
+
+            foodsList = await query
+                .Where(f => f.Description.ToLower().Replace(",", "").Contains(input))
+                .OrderByDescending(f => f.Popularity)
+                .Skip(skip)
                 .Take(10)
                 .ToListAsync();
 
             if (foodsList.Count != 0)
+            {
                 _cache.Set(cacheKey, foodsList, TimeSpan.FromDays(1));
+            }
         }
 
         if (foodsList!.Count == 0)

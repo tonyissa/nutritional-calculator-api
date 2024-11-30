@@ -19,7 +19,7 @@ public class PopularityUpdateService : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+            await Task.Delay(TimeSpan.FromMinutes(15), stoppingToken);
 
             _logger.LogInformation($"Starting popularity update service at {DateTime.Now}");
 
@@ -34,9 +34,10 @@ public class PopularityUpdateService : BackgroundService
                 {
                     var food = await context.Foods.FindAsync(change.Key, CancellationToken.None);
 
-                    _logger.LogInformation($"Food ID: {change.Key} Old popularity: {food!.Popularity} New Popularity: {food!.Popularity + change.Value}");
+                    var oldPopularity = food.Popularity;
+                    food.Popularity += change.Value;
 
-                    food!.Popularity += change.Value;
+                    _logger.LogInformation($"Food ID: {change.Key} Old popularity: {oldPopularity} New Popularity: {food.Popularity}");
                 }
 
                 await context.SaveChangesAsync(CancellationToken.None);

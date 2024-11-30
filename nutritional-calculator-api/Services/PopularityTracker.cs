@@ -17,7 +17,7 @@ public class PopularityTracker
             {
                 _popularityChanges[foodId] = 1;
             }
-        }    
+        }
     }
 
     public Dictionary<int, int> GetAndResetChanges()
